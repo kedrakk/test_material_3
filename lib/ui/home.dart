@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:test_esign_pspdfplugin/data/data.dart';
+import 'package:test_esign_pspdfplugin/model/cat_fact.dart';
 import 'package:test_esign_pspdfplugin/model/prices.dart';
 import 'package:test_esign_pspdfplugin/network/network_data.dart';
 
@@ -15,8 +16,10 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with ConstData {
   late String _currentName;
   MetalPrices? metalPrices;
+  CatFact? catFact;
   NetworkData networkData = NetworkData();
   String _errorMessage = "";
+  String _catFactErrorMessage = "";
 
   _suffleName() {
     int index = Random().nextInt(5);
@@ -40,10 +43,27 @@ class _HomePageState extends State<HomePage> with ConstData {
     setState(() {});
   }
 
+  _getCatFactData() async {
+    try {
+      catFact = await networkData.getARandomCatFat();
+    } catch (exp) {
+      _catFactErrorMessage = exp.toString();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Something went wrong",
+          ),
+        ),
+      );
+    }
+    setState(() {});
+  }
+
   @override
   void initState() {
     _currentName = names.first;
     _getData();
+    _getCatFactData();
     super.initState();
   }
 
@@ -80,6 +100,14 @@ class _HomePageState extends State<HomePage> with ConstData {
             metalPrices == null
                 ? Text(_errorMessage)
                 : TableWidget(metalPrices: metalPrices!),
+            const SizedBox(
+              height: 15,
+            ),
+            catFact == null
+                ? Text(_catFactErrorMessage)
+                : Text(
+                    "Length:${catFact!.length}, Message:${catFact!.fact}",
+                  ),
           ],
         ),
       ),
